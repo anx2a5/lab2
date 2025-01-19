@@ -1,17 +1,31 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class JokeCard extends StatelessWidget {
-  final String type;
+  final String setup;
+  final String punchline;
   final Function onTap;
+  final Function onFavoriteTap;
 
-  JokeCard({required this.type, required this.onTap});
+  const JokeCard({
+    Key? key,
+    required this.setup,
+    required this.punchline,
+    required this.onTap,
+    required this.onFavoriteTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.all(10),
+      margin: const EdgeInsets.all(10),
       child: ListTile(
-        title: Text(type),
+        title: Text(setup),
+        subtitle: Text(punchline),
+        trailing: IconButton(
+          icon: const Icon(Icons.favorite),
+          onPressed: () => onFavoriteTap(), // Add to favorites
+        ),
         onTap: () => onTap(),
       ),
     );

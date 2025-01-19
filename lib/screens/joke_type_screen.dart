@@ -5,7 +5,7 @@ import '../models/joke.dart';
 class JokeTypeScreen extends StatelessWidget {
   final String type;
 
-  const JokeTypeScreen({Key? key, required this.type}) : super(key: key);
+  const JokeTypeScreen({super.key, required this.type});
 
   @override
   Widget build(BuildContext context) {

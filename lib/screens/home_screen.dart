@@ -1,69 +1,67 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:lab2/screens/random_joke_screen.dart';
-import '../services/api_services.dart';
 import '../widgets/joke_card.dart';
-import 'joke_type_screen.dart';
+import 'favorite_jokes_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  late Future<List<String>> jokeTypes;
-
-  @override
-  void initState() {
-    super.initState();
-    jokeTypes = ApiService.fetchJokeTypes();
-  }
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Joke App'),
+        title: const Text('Jokes'),
         actions: [
           IconButton(
-            icon: Icon(Icons.shuffle),
+            icon: const Icon(Icons.favorite),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => RandomJokeScreen(),
-                ),
+                MaterialPageRoute(builder: (context) => const FavoriteJokesScreen()),
               );
             },
-          )
+          ),
         ],
       ),
-      body: FutureBuilder<List<String>>(
-        future: jokeTypes,
+      body: FutureBuilder(
+        future: fetchJokes(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+          if (!snapshot.hasData) {
+            return const Center(child: Text("No jokes available"));
           }
-          final types = snapshot.data!;
-          return ListView(
-            children: types.map((type) {
+          final jokes = snapshot.data as List<Map<String, String>>;
+          return ListView.builder(
+            itemCount: jokes.length,
+            itemBuilder: (context, index) {
               return JokeCard(
-                type: type,
+                setup: jokes[index]['setup']!,
+                punchline: jokes[index]['punchline']!,
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => JokeTypeScreen(type: type),
-                    ),
-                  );
+                  // Handle tap event
+                },
+                onFavoriteTap: () {
+                  addToFavorites(jokes[index]);
                 },
               );
-            }).toList(),
+            },
           );
         },
       ),
     );
+  }
+
+  Future<List<Map<String, String>>> fetchJokes() async {
+    // Replace with API call to fetch jokes
+    return [
+      {'setup': 'Why do programmers prefer dark mode?', 'punchline': 'Because light attracts bugs!'},
+      {'setup': 'Why do Java developers wear glasses?', 'punchline': 'Because they can\'t C#.'},
+    ];
+  }
+
+  void addToFavorites(Map<String, String> joke) {
+    FirebaseFirestore.instance.collection('favorites').add(joke);
   }
 }
